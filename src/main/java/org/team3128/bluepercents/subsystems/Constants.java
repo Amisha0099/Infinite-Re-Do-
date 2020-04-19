@@ -1,4 +1,4 @@
-package org.team3128.compbot.subsystems;
+package org.team3128.bluepercents.subsystems;
 
 import org.team3128.common.utility.units.Length;
 import org.team3128.common.utility.units.Angle;
@@ -15,8 +15,7 @@ import org.team3128.common.generics.RobotConstants;
 public class Constants extends RobotConstants {
 
         public static class GameConstants {
-                public static final double SHOOTER_TARGET_HEIGHT = 98.25; // height of target in INCHES
-                public static final double BALL_HEIGHT = 9; // height of the ball in centimeters
+                
         }
 
         public static class MechanismConstants {
@@ -99,7 +98,7 @@ public class Constants extends RobotConstants {
 
 
         public static class TestSuiteConstants {
-
+/*
                 public static CanDevices intake;
                 public static CanDevices rightDriveLeader;
                 public static CanDevices rightDriveFollower;
@@ -113,10 +112,11 @@ public class Constants extends RobotConstants {
                 public static CanDevices gatekeeper;
                 public static CanDevices shooterRight;
                 public static CanDevices corner;
-                
+          */      
         }
 
         public static class ShooterConstants {
+                /*
                 public static final int SHOOTER_MOTOR_LEFT_ID = 8;
                 public static final int SHOOTER_MOTOR_RIGHT_ID = 7;
 
@@ -126,38 +126,26 @@ public class Constants extends RobotConstants {
                 public static final double SHOOTER_SATURATION_LIMIT = 5; // set limit on integral accumulation (in this case, 1 volt)
                 public static final double RPM_THRESHOLD = 100; // the maximum difference between an RPM and the setpoint for a data point to be considered as a plataeu
                 public static final int PLATEAU_COUNT = 25; // 50 * 0.005s = 0.25 seconds of plateau required
+                */
+
+
         }
 
-        public static class HopperConstants {
+        public static class BoxIntakeConstants {
+                
+                public static final int LEFT_BOX_MOTOR_ID = 10;
+                public static final int RIGHT_BOX_MOTOR_ID = 9;
 
-                public static final int HOPPER_FEEDER_MOTOR_ID = 6;
-                public static final int CORNER_MOTOR_ID = 10;
-                public static final int GATEKEEPER_MOTOR_ID = 9;
-
-                public static final int SENSOR_0_ID = 8;
-                public static final int SENSOR_1_ID = 9;
+                public static final int SENSOR_BOX_ID = 8;
                 //public static final int SENSOR_2_ID = 999;
 
-
                 public static final double DEBUG_MOTOR_POWER = 0.4;
-                public static final int CAPACITY = 5; // num of balls that the hopper can store
-                public static final double BASE_POWER = -0.5;
-                public static final double FEEDER_REVERSE = 0.25;
-                public static final double GATEKEEPER_POWER = -0.75;
-                public static final double INDEXER_POWER = -0.40;
-                public static final double[] BALL_SPACING = {-6/*25*/, -8/*-27.5*/, -1, 0};//{ -25, -20, -20, -20 }; //offsets for the spacing out the balls in the hopper
-                public static final double REVERSE_TIMEOUT = 1.5; //timeout for how long to run the corner motors back (in case the sensor gets triggered)
-                public static final int JAM_COUNT_THRESHOLD = 100; //how long the motor has to be stopped in order for it to be considered a jam: 100 loop counts * 1/200hz = 0.5 seconds
-                public static final int JAM_REVERSE_COUNT_THRESHOLD = 100; //how long to reverse the intake after a jam is detected: 100 loop counts * 1/200hz = 0.5 seconds
+                public static final int CAPACITY = 1; // num of balls that the hopper can store
+                public static final double BOX_MOTOR_ON_VALUE = -0.65;
+                public static final double BOX_MOTOR_OFF_VALUE = 0;
+                
         }
 
-        public static class IntakeConstants {
-                public static final int INTAKE_MOTOR_ID = 5;
-
-                public static final double INTAKE_MOTOR_ON_VALUE = -0.65;
-                public static final double INTAKE_MOTOR_OFF_VALUE = 0;
-                public static final double INTAKE_MOTOR_REVERSE_VALUE = 0.4; //for clearing jams
-        }
         
         public static class ClimberConstants {
                 public static final int LEFT_MOTOR_ID = 12;

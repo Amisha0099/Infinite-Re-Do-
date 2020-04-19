@@ -121,6 +121,7 @@ public class FalconDrive extends Drive {
 		System.out.println("R speed " + " actual " + getRightSpeed());
 
 	}
+	
 
 	@Override
 	public void setRight() {
@@ -414,7 +415,7 @@ public class FalconDrive extends Drive {
 				+ ", kD = " + kD + ", kF = " + kF);
 	}
 
-	@Override
+	
 	public void updateTurn() {
 		double error = wantedHeading.rotateBy(RobotTracker.getInstance().getOdometry().rotationMat.inverse())
 				.getDegrees();
@@ -434,6 +435,7 @@ public class FalconDrive extends Drive {
 			setWheelVelocity(new DriveSignal(-deltaSpeed, deltaSpeed));
 		}
 	}
+	
 
 	@Override
 	public void setShiftState(boolean state) {
@@ -448,8 +450,8 @@ public class FalconDrive extends Drive {
 		}
 		State currentTrajectoryState = trajectory.sample(currentTime - startTime);
 
-		AutoDriveSignal signal = autonomousDriver.calculate(RobotTracker.getInstance().getOdometry(),
-				currentTrajectoryState);
+	//	AutoDriveSignal signal = autonomousDriver.calculate(RobotTracker.getInstance().getOdometry(),
+				//currentTrajectoryState);
 		if ((currentTime - startTime) == totalTime) {
 			synchronized (this) {
 				Log.info("FalconDrive", "Finished Trajectory Pursuit with RamseteController successfully.");
@@ -459,7 +461,7 @@ public class FalconDrive extends Drive {
 		}
 		// System.out.println("signal l:" + signal.command.leftVelocity + " signal R " +
 		// signal.command.rightVelocity);
-		setWheelVelocity(signal.command);
+		//setWheelVelocity(signal.command);
 	}
 
 	@Override
