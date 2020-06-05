@@ -24,23 +24,31 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class BoxIntake extends Threaded {
 
-    public enum ActionState {
+    public enum BoxState {
         STANDBY, INTAKING, EJECTING;
 
-        private ActionState() {
+        private BoxState() {
 
         }
     }
 
     public LazyCANSparkMax LEFT_BOX_MOTOR;
     public LazyCANSparkMax RIGHT_BOX_MOTOR;
+    public CANEncoder BOX_ENCODER;
     public DigitalInput BOX_SENSOR;
 
+    public boolean intakeBoxButton = false;
+    public boolean ejectBoxButton = false; 
+
+    public boolean intakingBox = false;
+    public boolean ejectingBox = false;
+
     private static final BoxIntake instance = new BoxIntake();
+    public BoxState BoxState;
 
-    public ActionState actionState;
     public boolean SENSOR_BOX_STATE = false;
-
+    private boolean detectBool;
+    public double boxInitialPos = 0;
 
     public static BoxIntake getInstance() {
         return instance;
@@ -49,10 +57,51 @@ public class BoxIntake extends Threaded {
     private BoxIntake() {
         configMotors();
         configSensors();
+        configEncoders();
     }
 
     public void update(){
+        SENSOR_BOX_STATE = detectsBox();
+    
+        //intake the box
+        if(intakeBoxButton = true){
+            intakingBox = true;
+            intakeBoxButton = false;
+        }
 
+        if((intakingBox = true) && (!SENSOR_BOX_STATE)){
+            LEFT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
+            RIGHT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
+
+        }
+        else{
+            LEFT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_OFF_VALUE);
+            RIGHT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_OFF_VALUE);
+            
+            intakingBox = false;
+        }
+        
+        //eject the box
+        if(ejectBoxButton = true){
+            ejectingBox = true;
+            boxInitialPos = BOX_ENCODER.getPosition();
+
+            ejectBoxButton = false;
+        }
+
+        if(ejectingBox){
+            if(Math.abs(BOX_ENCODER.getPosition()) < Math.abs(boxInitialPos + Constants.BoxIntakeConstants.BOX_OFFSET_VALUE)){
+                LEFT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
+                RIGHT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
+            }
+            else{
+                LEFT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_OFF_VALUE);
+                RIGHT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_OFF_VALUE);
+
+                ejectingBox = false;
+            }
+        }
+        
     }
 
     private void configMotors(){
@@ -64,24 +113,25 @@ public class BoxIntake extends Threaded {
         BOX_SENSOR = new DigitalInput(Constants.BoxIntakeConstants.SENSOR_BOX_ID);
     }
 
-    public void setAction(ActionState state){
-        this.actionState = state;
-        if(state == ActionState.INTAKING){
-            LEFT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
-            RIGHT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
+    private void configEncoders(){
+        BOX_ENCODER = LEFT_BOX_MOTOR.getEncoder();
+    }
 
+    public boolean detectsBox(){
+        if(BOX_SENSOR.get()){
+            detectBool = true;
         }
-
-        if(state == ActionState.EJECTING){
-            LEFT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
-            RIGHT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
-
+        else {
+            detectBool = false;
         }
+        return detectBool;
+    }
 
-        if(state == ActionState.STANDBY){
-            LEFT_BOX_MOTOR.set(0);
-            RIGHT_BOX_MOTOR.set(0);
+    public void intakingBox(){
+        intakeBoxButton = true;
+    }
 
-        }
+    public void ejectingBox(){
+        ejectBoxButton = true;
     }
 }

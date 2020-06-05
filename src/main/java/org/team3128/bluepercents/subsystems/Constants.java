@@ -14,9 +14,6 @@ import org.team3128.common.generics.RobotConstants;
 // the superclass is purely for semantic purposes
 public class Constants extends RobotConstants {
 
-        public static class GameConstants {
-                
-        }
 
         public static class MechanismConstants {
                 public static final double ENCODER_RESOLUTION_PER_ROTATION = 2048;
@@ -92,8 +89,6 @@ public class Constants extends RobotConstants {
                 public static final double TX_THRESHOLD = 2; // the maximum error in tx where the shooter will be allowed to shoot
                 public static final double TX_OFFSET = 0; // to offset alignment in either direction
                 public static final PIDConstants VISION_PID = new PIDConstants(0, 0.014, 0.02, 0.00006);
-                public static final PIDConstants BALL_PID = new PIDConstants(0.57, 0.02, 0.0, 0.00003);
-                public static final PIDConstants BLIND_BALL_PID = new PIDConstants(0.23, 0, 0, 0);
         }
 
 
@@ -137,48 +132,69 @@ public class Constants extends RobotConstants {
                 public static final int RIGHT_BOX_MOTOR_ID = 9;
 
                 public static final int SENSOR_BOX_ID = 8;
-                //public static final int SENSOR_2_ID = 999;
 
-                public static final double DEBUG_MOTOR_POWER = 0.4;
-                public static final int CAPACITY = 1; // num of balls that the hopper can store
                 public static final double BOX_MOTOR_ON_VALUE = -0.65;
                 public static final double BOX_MOTOR_OFF_VALUE = 0;
+
+                public static final double BOX_OFFSET_VALUE = 2;
                 
+        }
+
+        public static class BellIntakeConstants {
+                public static final int BELL_MOTOR_ID = 14;
+
+                public static final int SENSOR_BELL_ID = 15;
+                public static final double BELL_MOTOR_ON_VALUE = -0.5;
+                public static final double BELL_MOTOR_OFF_VALUE = 0;
+
+                public static final double BELL_OFFSET_VALUE = 1;
         }
 
         
         public static class ClimberConstants {
-                public static final int LEFT_MOTOR_ID = 12;
-                public static final int RIGHT_MOTOR_ID = 11;
+                public static final int LEFT_CLIMBER_MOTOR_ID = 12;
+                public static final int RIGHT_CLIMBER_MOTOR_ID = 13;
+                public static final int TURNING_CLIMBER_MOTOR_ID = 14;
                 public static final double CLIMB_POWER = 0.5;
+
+                public static final PIDConstants CLIMBER_PID = new PIDConstants(0, 0.15, 0.01, 0);
+                public static final double CLIMBER_SATURATION_LIMIT = 3 / CLIMBER_PID.kI;
         }
 
         public static class ArmConstants {
-                public static final int ARM_MOTOR_LEADER_ID = 13;
-                public static final int ARM_MOTOR_FOLLOWER_ID = 4;
-                public static final int ARM_LIMIT_SWITCH_ID = 0;
+                public static final int LOWER_MOTOR_ID = 13;
+                public static final int UPPER_MOTOR_ID = 4;
 
                 public static final NeutralMode ARM_NEUTRAL_MODE = NeutralMode.Brake;
                 public static final NeutralMode ARM_NEUTRAL_MODE_DEBUG = NeutralMode.Coast;
-                public static final double MAX_ARM_ANGLE = 80;
-                public static final double ANGLE_THRESHOLD = 4;
-                public static final double PLATEAU_THRESHOLD = 50;
-
+        
                 public static final double ARM_GEARING = 60 / 12 * 80 / 18 * 64 / 8; // for every (ARM_GEARING)
                                                                                      // rotations of the
                 // motor, we get 1 rotation of the arm (ask
                 // mech for this)
-                public static final double ARM_LENGTH = 30; 
+
+                public static final double MAX_ARM_ANGLE = 180;
                 public static final double LIMELIGHT_ARM_LENGTH = 19;
                 public static final double LIMELIGHT_ARM_ANGLE = 40.26;
 
                 public static final PIDConstants ARM_PID = new PIDConstants(0, 0.15, 0.01, 0);
+                public static final double kf_term = 0.12;
 
                 public static final double ARM_SATURATION_LIMIT = 2 / ARM_PID.kI; // set limit on integral accumulation
-                public static final double ZEROING_POWER = -0.35;
 
                 public static final double STARTING_ANGLE = 48.87; //the angle that the arm is at when it is within frame perimeter
                 public static final int STARTING_POSITION = (int) ((STARTING_ANGLE / 360) * MechanismConstants.ENCODER_RESOLUTION_PER_ROTATION * ARM_GEARING);
+
+                public static final double g = 9.81;
+                public static final double LOWER_MASS = 40;
+                public static final double LOWER_RADIUS = 20;
+
+                public static final double UPPER_BOX_MASS = 30;
+                public static final double UPPER_BELL_MASS = 15;
+                public static final double UPPER_BOX_RADIUS = 10;
+                public static final double UPPER_BELL_RADIUS = 8;
+
+                public static final double SPIN_WHEEL_POWER = 15;
         }
 
 }

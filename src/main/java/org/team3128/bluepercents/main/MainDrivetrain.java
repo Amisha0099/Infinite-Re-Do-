@@ -35,13 +35,9 @@ import org.team3128.common.utility.test_suite.CanDevices;
 import org.team3128.common.utility.test_suite.ErrorCatcherUtility;
 import org.team3128.bluepercents.commands.*;
 import org.team3128.bluepercents.autonomous.AutoPriority;
-//import org.team3128.bluepercents.calibration.*;
 import org.team3128.bluepercents.subsystems.*;
 import org.team3128.bluepercents.subsystems.Constants;
-//import org.team3128.bluepercents.subsystems.RobotTracker;
-//import org.team3128.bluepercents.subsystems.Arm.ArmState;
-import org.team3128.bluepercents.subsystems.BoxIntake.ActionState;
-//import org.team3128.bluepercents.subsystems.StateTracker.RobotState;
+import org.team3128.bluepercents.subsystems.Arm.ArmState;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -67,18 +63,15 @@ import org.team3128.common.generics.ThreadScheduler;
 
 public class MainDrivetrain extends NarwhalRobot {
 
-    //public Command triggerCommand;
     private DriveCommandRunning driveCmdRunning;
+    public Command triggerCommand;
 
-    // public StateTracker stateTracker = StateTracker.getInstance();
     static FalconDrive drive = FalconDrive.getInstance();
- 
-    //static Arm arm = Arm.getInstance();
-    
-    //static Climber climber = new Climber();
-    
+    static Arm arm = Arm.getInstance();
+    static Climber climber = new Climber();
     static BoxIntake boxIntake = BoxIntake.getInstance();
-    // RobotTracker robotTracker = RobotTracker.getInstance();
+    static BellIntake bellIntake = BellIntake.getInstance();
+
 
     ExecutorService executor = Executors.newFixedThreadPool(6);
     ThreadScheduler scheduler = new ThreadScheduler();
@@ -99,16 +92,15 @@ public class MainDrivetrain extends NarwhalRobot {
     public ArrayList<Pose2D> waypoints = new ArrayList<Pose2D>();
     public Trajectory trajectory;
 
-    //public Limelight shooterLimelight, ballLimelight;
-    //public Limelight[] limelights;
-    //public boolean inPlace = false;
-    //public boolean inPlace2 = false;
+    public Limelight limelight;
+   
 
     @Override
     protected void constructHardware() {
         scheduler.schedule(drive, executor);
         scheduler.schedule(boxIntake, executor);
-        // scheduler.schedule(robotTracker, executor);
+        scheduler.schedule(bellIntake, executor);
+        scheduler.schedule(arm, executor);
 
         driveCmdRunning = new DriveCommandRunning();
 
@@ -122,15 +114,10 @@ public class MainDrivetrain extends NarwhalRobot {
         listenerLeft = new ListenerManager(joystickLeft);
         addListenerManager(listenerLeft);
 
-        // initialization of limelights
-
-        //shooterLimelight = new Limelight("limelight-shooter", 26.0, 0, 0, 30);
-        //ballLimelight = new Limelight("limelight-c", Constants.VisionConstants.BOTTOM_LIMELIGHT_ANGLE,
-                //Constants.VisionConstants.BOTTOM_LIMELIGHT_HEIGHT,
-                //Constants.VisionConstants.BOTTOM_LIMELIGHT_DISTANCE_FROM_FRONT, 14.5 * Length.in);
-        //limelights = new Limelight[2];
-
+        // initialization of limelight
+        limelight = new Limelight("limelight", 26.0, 0, 0, 15);
   
+        pdp = new PowerDistributionPanel(0);
         drive.resetGyro();
     }
 
@@ -143,13 +130,17 @@ public class MainDrivetrain extends NarwhalRobot {
         listenerRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
         listenerRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
         listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-        listenerRight.nameControl(new Button(3), "BoxIntake");
-        //listenerRight.nameControl(new Button(4), "RezeroArm");
+        listenerRight.nameControl(ControllerExtreme3D.TRIGGER, "AlignBell");
+        
+        listenerRight.nameControl(new Button(3), "BoxIntaking");
+        listenerRight.nameControl(new Button(4), "BoxEjecting");
+        listenerRight.nameControl(new Button(5), "BellIntaking");
         listenerRight.nameControl(new POV(0), "IntakePOV");
 
-        //listenerLeft.nameControl(ControllerExtreme3D.TRIGGER, "Climb");
-        listenerLeft.nameControl(new Button(3), "EjectClimber");
-        listenerLeft.nameControl(new Button(4), "EjectClimber");
+        listenerLeft.nameControl(ControllerExtreme3D.TRIGGER, "Climb");
+        listenerLeft.nameControl(new Button(3), "ReleaseClimber");
+        listenerLeft.nameControl(new Button(4), "ReleaseClimber");
+        listenerLeft.nameControl(new Button(5), "Skewering");
         listenerLeft.nameControl(new Button(11), "EmergencyReset");
         listenerLeft.nameControl(new Button(12), "EmergencyReset");
 
@@ -162,47 +153,58 @@ public class MainDrivetrain extends NarwhalRobot {
                 drive.arcadeDrive(horiz, vert, throttle, true);
             }
         }, "MoveTurn", "MoveForwards", "Throttle");
-        listenerRight.addButtonDownListener("BoxIntake", () -> {
-            Log.info("Button3", "pressed");
-            boxIntake.setAction(ActionState.INTAKING);
 
+        listenerRight.addButtonDownListener("BoxIntaking", () -> {
+            Log.info("Button3", "pressed");
+            boxIntake.intakingBox();
         });
-        listenerRight.addButtonDownListener("RezeroArm", () -> {
+
+        listenerRight.addButtonDownListener("BoxEjecting", () -> {
             Log.info("Button4", "pressed");
-            //arm.setState(ArmState.STOWED);
+            boxIntake.ejectingBox();
         });
-                 
-        /*listenerRight.addListener("IntakePOV", (POVValue pov) -> {
-            switch (pov.getDirectionValue()) {
-                case 8:
-                case 7:
-                case 1:
-                    //arm.setState(Arm.ArmState.INTAKE);
-                    break; 
-                default:
-                    break;
-            }
+
+        listenerRight.addButtonDownListener("BellIntaking", () -> {
+            Log.info("Button5", "pressed");
+            bellIntake.intakingBell();
         });
-        */
+
+        listenerRight.addButtonDownListener("AlignBell", () -> {
+            triggerCommand = new CmdAlignBell(drive, arm, bellIntake, ahrs, limelight, driveCmdRunning, Constants.VisionConstants.TX_OFFSET);
+            triggerCommand.start();
+        });
+
+        listenerRight.addButtonUpListener("AlignBell", () -> {
+            triggerCommand.cancel();
+            triggerCommand = null;
+        });
 
         listenerLeft.addButtonDownListener("Climb", () -> {
             Log.info("Trigger", "pressed");
-            //climber.setPower(Constants.ClimberConstants.CLIMB_POWER);
+            climber.setClimbingPower(Constants.ClimberConstants.CLIMB_POWER);
         });
+
         listenerLeft.addButtonUpListener("Climb", () -> {
             Log.info("Trigger", "released");
-            //climber.setPower(0.0);
+            climber.setClimbingPower(0.0);
         });
-        listenerLeft.addButtonDownListener("EjectClimber", () -> {
+
+        listenerLeft.addButtonDownListener("ReleaseClimber", () -> {
             Log.info("Button3/4", "pressed");
-            //arm.setState(ArmState.CLIMBING);
-            //climber.setIsClimbing(true);
+            climber.setAngle(-30);
+           
         });
+
+        listenerLeft.addButtonDownListener("Skewering", () -> {
+            Log.info("Button5", "pressed");
+            arm.setState(ArmState.SKEWERING);
+            boxIntake.ejectingBox();
+        });
+
         listenerLeft.addButtonDownListener("EmergencyReset", () -> {
             Log.info("MainCompBot", "EMERGENCY RESET PRESSED");
-            //arm.setState(ArmState.STOWED);
-            //climber.setPower(0);
-            //climber.setIsClimbing(false);
+            //climber.setAngle(0);
+            climber.setClimbingPower(0);
         });
     }
 
@@ -226,24 +228,25 @@ public class MainDrivetrain extends NarwhalRobot {
 
     @Override
     protected void updateDashboard() {
-        // SmartDashboard.putString("hopper update count", String.valueOf(//hopper.hopper_update_count));
+       /*
+        SmartDashboard.putString("hopper update count", String.valueOf(//hopper.hopper_update_count));
         NarwhalDashboard.put("time", DriverStation.getInstance().getMatchTime());
         NarwhalDashboard.put("voltage", RobotController.getBatteryVoltage());
         NarwhalDashboard.put("ball_count", 0);
 
-        //Log.info("HOPPER", "" + hopper.SENSOR_1_STATE);
+        Log.info("HOPPER", "" + hopper.SENSOR_1_STATE);
 
-        /*if (arm.getLimitStatus()) {
+        if (arm.getLimitStatus()) {
             arm.ARM_MOTOR_LEADER.setSelectedSensorPosition(0);
             arm.ARM_MOTOR_FOLLOWER.setSelectedSensorPosition(0);
         }
-*/
+
         currentLeftSpeed = drive.getLeftSpeed();
         currentRightSpeed = drive.getRightSpeed();
 
         currentSpeed = drive.getSpeed();
     
-/*
+
         SmartDashboard.putNumber("Left Velocity", currentLeftSpeed);
         SmartDashboard.putNumber("Right Velocity", currentRightSpeed);
 */
@@ -252,10 +255,9 @@ public class MainDrivetrain extends NarwhalRobot {
     @Override
     protected void teleopInit() {
         scheduler.resume();
-        //shooterLimelight.setLEDMode(LEDMode.OFF);
-        //arm.ARM_MOTOR_LEADER.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
-        //arm.ARM_MOTOR_FOLLOWER.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
-        Log.info("MainCompbot", "TeleopInit has started. Setting arm state to ArmState.STARTING");
+        limelight.setLEDMode(LEDMode.OFF);
+        arm.LOWER_MOTOR.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
+        arm.UPPER_MOTOR.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
         driveCmdRunning.isRunning = true;
     }
 
@@ -263,14 +265,16 @@ public class MainDrivetrain extends NarwhalRobot {
     protected void autonomousInit() {
         scheduler.resume();
         drive.resetGyro();
-
+        //add auto stuff
+        Command auto = new AutoPriority(drive, arm, bellIntake, ahrs, limelight, driveCmdRunning, 10000, scheduler);
+        auto.start();
     }
 
     @Override
     protected void disabledInit() {
-        //shooterLimelight.setLEDMode(LEDMode.OFF);
-        //arm.ARM_MOTOR_LEADER.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
-       // arm.ARM_MOTOR_FOLLOWER.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
+        limelight.setLEDMode(LEDMode.OFF);
+        arm.LOWER_MOTOR.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
+        arm.UPPER_MOTOR.setNeutralMode(Constants.ArmConstants.ARM_NEUTRAL_MODE);
     }
 
     public static void main(String... args) {
