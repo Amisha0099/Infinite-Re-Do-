@@ -86,7 +86,8 @@ public class BellIntake extends Threaded {
         }
 
         if(ejectingBell){
-            if(Math.abs(BELL_ENCODER.getPosition()) < Math.abs(bellInitialPos + Constants.BellIntakeConstants.BELL_OFFSET_VALUE)){
+            if(Math.abs(BELL_ENCODER.getPosition()) < Math.abs(bellInitialPos + 
+            Constants.BellIntakeConstants.BELL_OFFSET_VALUE)){
                 BELL_MOTOR.set(-BellIntakeConstants.BELL_MOTOR_ON_VALUE);
             }
             else{

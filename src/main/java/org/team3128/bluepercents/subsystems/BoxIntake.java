@@ -90,7 +90,8 @@ public class BoxIntake extends Threaded {
         }
 
         if(ejectingBox){
-            if(Math.abs(BOX_ENCODER.getPosition()) < Math.abs(boxInitialPos + Constants.BoxIntakeConstants.BOX_OFFSET_VALUE)){
+            if(Math.abs(BOX_ENCODER.getPosition()) < Math.abs(boxInitialPos + 
+                        Constants.BoxIntakeConstants.BOX_OFFSET_VALUE)){
                 LEFT_BOX_MOTOR.set(-BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
                 RIGHT_BOX_MOTOR.set(BoxIntakeConstants.BOX_MOTOR_ON_VALUE);
             }

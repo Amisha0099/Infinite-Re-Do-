@@ -18,9 +18,9 @@ public class Arm extends Threaded {
     public static enum ArmState {
         STARTING(35, 55),
         INTAKEBELL(65, 30),
-        OUTAKEBELL(15, 75),
+        OUTTAKEBELL(15, 75),
         INTAKEBOX(32, 58),
-        OUTAKEBOX(48, 42),
+        OUTTAKEBOX(48, 42),
         SPINWHEEL(65, 110),
         SKEWERING(35, 130);
 
@@ -89,7 +89,8 @@ public class Arm extends Threaded {
     
     public double upperArmFeedForward(double desired){
         double ff = Constants.ArmConstants.kf_term * Constants.ArmConstants.g * RobotMath.cos(desired) * 
-        (Constants.ArmConstants.UPPER_BOX_MASS * Constants.ArmConstants.UPPER_BOX_RADIUS - Constants.ArmConstants.UPPER_BELL_MASS * Constants.ArmConstants.UPPER_BELL_RADIUS);
+        (Constants.ArmConstants.UPPER_BOX_MASS * Constants.ArmConstants.UPPER_BOX_RADIUS 
+        - Constants.ArmConstants.UPPER_BELL_MASS * Constants.ArmConstants.UPPER_BELL_RADIUS);
         return ff;
     }
 
@@ -161,22 +162,10 @@ public class Arm extends Threaded {
 
         lowOutput = voltage_output / voltage;
         if (lowOutput > 1) {
-            // Log.info("ARM",
-            //         "WARNING: Tried to set power above available voltage! Saturation limit SHOULD take care of this");
             lowOutput = 1;
         } else if (lowOutput < -1) {
-            // Log.info("ARM",
-            //         "WARNING: Tried to set power above available voltage! Saturation limit SHOULD take care of this ");
             lowOutput = -1;
         }
-
-        /*if (Math.abs(error) < Constants.ArmConstants.ANGLE_THRESHOLD) {
-            plateauCount++;
-        } else {
-            plateauCount = 0;
-        }
-        */
-
 
         LOWER_MOTOR.set(ControlMode.PercentOutput, lowOutput);
 

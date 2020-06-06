@@ -132,10 +132,11 @@ public class MainDrivetrain extends NarwhalRobot {
         listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
         listenerRight.nameControl(ControllerExtreme3D.TRIGGER, "AlignBell");
         
-        listenerRight.nameControl(new Button(3), "BoxIntaking");
-        listenerRight.nameControl(new Button(4), "BoxEjecting");
-        listenerRight.nameControl(new Button(5), "BellIntaking");
+        listenerRight.nameControl(new Button(3), "BoxIntakeState");
+        listenerRight.nameControl(new Button(4), "BoxOuttakeState");
+        listenerRight.nameControl(new Button(5), "BellIntakeState");
         listenerRight.nameControl(new POV(0), "IntakePOV");
+
 
         listenerLeft.nameControl(ControllerExtreme3D.TRIGGER, "Climb");
         listenerLeft.nameControl(new Button(3), "ReleaseClimber");
@@ -154,19 +155,22 @@ public class MainDrivetrain extends NarwhalRobot {
             }
         }, "MoveTurn", "MoveForwards", "Throttle");
 
-        listenerRight.addButtonDownListener("BoxIntaking", () -> {
+        listenerRight.addButtonDownListener("BoxIntakeState", () -> {
             Log.info("Button3", "pressed");
-            boxIntake.intakingBox();
+            arm.setState(ArmState.INTAKEBOX);
+            
         });
 
-        listenerRight.addButtonDownListener("BoxEjecting", () -> {
+        listenerRight.addButtonDownListener("BoxOuttakeState", () -> {
             Log.info("Button4", "pressed");
-            boxIntake.ejectingBox();
+            arm.setState(ArmState.OUTTAKEBOX);
+           
         });
 
-        listenerRight.addButtonDownListener("BellIntaking", () -> {
+        listenerRight.addButtonDownListener("BellIntakeState", () -> {
             Log.info("Button5", "pressed");
-            bellIntake.intakingBell();
+            arm.setState(ArmState.INTAKEBELL);
+           
         });
 
         listenerRight.addButtonDownListener("AlignBell", () -> {
@@ -177,6 +181,45 @@ public class MainDrivetrain extends NarwhalRobot {
         listenerRight.addButtonUpListener("AlignBell", () -> {
             triggerCommand.cancel();
             triggerCommand = null;
+        });
+
+        listenerRight.addListener("IntakePOV", (POVValue pov) -> {
+            switch (pov.getDirectionValue()) {
+                case 8:
+                case 2:
+                case 1:
+                    //intake box
+                    if(arm.ARM_STATE == ArmState.INTAKEBOX){
+                        boxIntake.intakingBox();
+                    } 
+                    
+                    break;
+
+                case 7:
+                case 6:
+                    //intake bell
+                    if (arm.ARM_STATE == ArmState.INTAKEBELL){
+                        bellIntake.intakingBell();
+                    } 
+                    break;
+                
+                case 3:
+                case 4: 
+                case 5: 
+                    //outtake box
+                    if (arm.ARM_STATE == ArmState.OUTTAKEBOX){
+                        boxIntake.ejectingBox();
+                    }
+
+                    break;
+
+                case 0:
+                    
+                    break;
+
+                default:
+                    break;
+            }
         });
 
         listenerLeft.addButtonDownListener("Climb", () -> {
@@ -198,7 +241,6 @@ public class MainDrivetrain extends NarwhalRobot {
         listenerLeft.addButtonDownListener("Skewering", () -> {
             Log.info("Button5", "pressed");
             arm.setState(ArmState.SKEWERING);
-            boxIntake.ejectingBox();
         });
 
         listenerLeft.addButtonDownListener("EmergencyReset", () -> {
@@ -206,6 +248,8 @@ public class MainDrivetrain extends NarwhalRobot {
             //climber.setAngle(0);
             climber.setClimbingPower(0);
         });
+
+        
     }
 
     @Override

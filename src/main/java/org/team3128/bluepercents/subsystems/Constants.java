@@ -92,40 +92,6 @@ public class Constants extends RobotConstants {
         }
 
 
-        public static class TestSuiteConstants {
-/*
-                public static CanDevices intake;
-                public static CanDevices rightDriveLeader;
-                public static CanDevices rightDriveFollower;
-                public static CanDevices feeder;
-                public static CanDevices PDP;
-                public static CanDevices leftDriveLeader;
-                public static CanDevices leftDriveFollower;
-                public static CanDevices armLeader;
-                public static CanDevices armFollower;
-                public static CanDevices shooterLeft;
-                public static CanDevices gatekeeper;
-                public static CanDevices shooterRight;
-                public static CanDevices corner;
-          */      
-        }
-
-        public static class ShooterConstants {
-                /*
-                public static final int SHOOTER_MOTOR_LEFT_ID = 8;
-                public static final int SHOOTER_MOTOR_RIGHT_ID = 7;
-
-                public static final double SHOOTER_GEARING = 1.5; // for every 1 rotation of the motor, the shooter does {SHOOTER_GEARING} rotations
-                public static final PIDConstants SHOOTER_PID = new PIDConstants(0, 0.000007, 0, 0);
-
-                public static final double SHOOTER_SATURATION_LIMIT = 5; // set limit on integral accumulation (in this case, 1 volt)
-                public static final double RPM_THRESHOLD = 100; // the maximum difference between an RPM and the setpoint for a data point to be considered as a plataeu
-                public static final int PLATEAU_COUNT = 25; // 50 * 0.005s = 0.25 seconds of plateau required
-                */
-
-
-        }
-
         public static class BoxIntakeConstants {
                 
                 public static final int LEFT_BOX_MOTOR_ID = 10;
